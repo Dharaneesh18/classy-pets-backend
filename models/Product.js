@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-const ProductSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  price: { type: mongoose.Schema.Types.Mixed, required: true }, // can be number or array
-  image: { type: String, default: "" } // optional, you can add image URLs
+  price: { type: mongoose.Schema.Types.Mixed, required: true }, // number or array
+  image: { type: String, required: true },
 });
 
-module.exports = mongoose.model("Product", ProductSchema);
+module.exports = mongoose.model("Product", productSchema);

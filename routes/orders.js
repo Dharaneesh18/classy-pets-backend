@@ -1,36 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
+const Order = require("../models/Order");
+const dotenv = require("dotenv");
+dotenv.config();
 
-// Order Schema
-const orderSchema = new mongoose.Schema({
-  customer: {
-    name: String,
-    phone: String,
-    address: String
-  },
-  items: [
-    {
-      productId: mongoose.Schema.Types.ObjectId,
-      name: String,
-      price: Number,
-      quantity: Number
-    }
-  ],
-  totalAmount: Number,
-  createdAt: { type: Date, default: Date.now }
-});
-
-const Order = mongoose.model("Order", orderSchema);
-
-// Add new order
+// POST new order
 router.post("/", async (req, res) => {
   try {
-    const order = new Order(req.body);
-    const saved = await order.save();
-    res.json(saved);
+    const { products, customerName, phone, address } = req.body;
+    const order = new Order({ products, customerName, phone, address });
+    await order.save();
+
+    // WhatsApp message URL
+    const message = `New Order from ${customerName}%0APhone: ${phone}%0AAddress: ${address}%0AProducts:%0A${products.map(p=>`${p.name} - Qty: ${p.quantity}`).join('%0A')}`;
+    const whatsappUrl = `https://wa.me/${process.env.WHATSAPP_NUMBER}?text=${message}`;
+
+    res.json({ success: true, whatsappUrl });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
